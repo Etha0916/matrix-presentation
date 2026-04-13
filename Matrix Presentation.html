@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Grammar of Space</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for compiling JSX in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // --- SVGs for Icons (Replacing Lucide dependencies for offline use) ---
+        const ChevronLeft = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>);
+        const ChevronRight = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>);
+        const BoxSelect = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 8v.01"/><path d="M5 12v.01"/><path d="M5 16v.01"/><path d="M9 5h.01"/><path d="M9 19h.01"/><path d="M13 5h.01"/><path d="M13 19h.01"/><path d="M17 5h.01"/><path d="M17 19h.01"/><path d="M21 8v.01"/><path d="M21 12v.01"/><path d="M21 16v.01"/><rect width="16" height="16" x="4" y="4" rx="2"/></svg>);
+        const Play = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>);
+        const RotateCcw = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>);
+        const Maximize2 = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"/><line x1="14" x2="21" y1="10" y2="3"/><polyline points="9 21 3 21 3 15"/><line x1="10" x2="3" y1="14" y2="21"/></svg>);
+        const MoveDiagonal = ({ className }) => (<svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 5 19 5 19 11"/><polyline points="11 19 5 19 5 13"/><line x1="19" x2="5" y1="5" y2="19"/></svg>);
+
+        // --- Slide Content ---
+        const slides = [
+          {
+            title: "1. The Grammar of Space",
+            subtitle: "Matrix Multiplication as Composition",
+            content: "A matrix is not a box of numbers; it is the mathematical representation of an 'Action' or a 'Verb'. Just like language uses syntax to build meaning, linear algebra uses matrices to transform space.",
+            quote: "Think of a matrix not as a noun, but as a verb."
+          },
+          {
+            title: "2. Re-defining the Core Logic",
+            subtitle: "Syntax Matters (Non-commutative)",
+            content: "The product AB means 'perform action B, then perform action A'. Just like in English grammar, syntax changes meaning. 'The dog bites the man' is not 'The man bites the dog'. In math, AB ≠ BA.",
+            quote: "Sequence dictates the outcome."
+          },
+          {
+            title: "3. Geometric Intuition",
+            subtitle: "Coordinate Translation",
+            content: "The tedious 'row-by-column' arithmetic we learn in high school is simply the mechanical way we calculate the projection of new coordinates in a transformed space. Watch the grid twist, rotate, and stretch.",
+            quote: "Multiplication is spatial translation."
+          },
+          {
+            title: "4. The Tech Bottleneck (AI)",
+            subtitle: "Why CPUs fail and GPUs rule",
+            content: "A traditional CPU is like a brilliant professor working sequentially. A GPU is like 10,000 students working in parallel. Every AI inference requires billions of matrix operations. AI is bottlenecked by this exact math.",
+            quote: "AI advancement = Matrix multiplication speed."
+          },
+          {
+            title: "5. Conclusion",
+            subtitle: "The Syntax of the Digital Age",
+            content: "Matrix multiplication is the foundational tool for processing high-dimensional information.",
+            quote: "Just as grammar dictates literature, matrix multiplication dictates AI."
+          }
+        ];
+
+        // --- Main App Component ---
+        function App() {
+          const [currentSlide, setCurrentSlide] = useState(0);
+          
+          const [matrix, setMatrix] = useState([
+            ['1', '0'],
+            ['0', '1']
+          ]);
+
+          const updateMatrix = (row, col, value) => {
+            const newMatrix = [...matrix];
+            newMatrix[row][col] = value;
+            setMatrix(newMatrix);
+          };
+
+          const setPreset = (preset) => {
+            setMatrix(preset.map(row => row.map(String)));
+          };
+
+          const presets = {
+            identity: [[1, 0], [0, 1]],
+            rotation: [[0, -1], [1, 0]],
+            scale: [[2, 0], [0, 0.5]],
+            shear: [[1, 1], [0, 1]],
+            projection: [[1, 0], [0, 0]]
+          };
+
+          // Math to SVG Coordinate Conversion
+          const size = 500;
+          const center = size / 2;
+          const scale = size / 10; // -5 to 5 range
+
+          const toSvg = (x, y) => ({
+            cx: center + x * scale,
+            cy: center - y * scale
+          });
+
+          const transform = (x, y) => {
+            const a = parseFloat(matrix[0][0]) || 0;
+            const b = parseFloat(matrix[0][1]) || 0;
+            const c = parseFloat(matrix[1][0]) || 0;
+            const d = parseFloat(matrix[1][1]) || 0;
+            return {
+              x: a * x + b * y,
+              y: c * x + d * y
+            };
+          };
+
+          // Generate grid lines
+          const gridLines = [];
+          for (let i = -5; i <= 5; i++) {
+            gridLines.push({ x1: i, y1: -5, x2: i, y2: 5 }); // Vertical
+            gridLines.push({ x1: -5, y1: i, x2: 5, y2: i }); // Horizontal
+          }
+
+          return (
+            <div className="flex h-screen w-full bg-slate-50 text-slate-800 font-sans">
+              
+              {/* Left Panel: Presentation Slides */}
+              <div className="w-1/3 flex flex-col border-r border-slate-200 bg-white shadow-xl z-10">
+                <div className="p-8 flex-grow flex flex-col justify-center relative">
+                  
+                  <div className="absolute top-8 left-8 text-xs font-bold uppercase tracking-widest text-indigo-500">
+                    Slide {currentSlide + 1} / {slides.length}
+                  </div>
+
+                  <h1 className="text-3xl font-extrabold text-slate-900 mt-8 mb-2 leading-tight">
+                    {slides[currentSlide].title}
+                  </h1>
+                  <h2 className="text-lg font-medium text-indigo-600 mb-6">
+                    {slides[currentSlide].subtitle}
+                  </h2>
+                  
+                  <p className="text-slate-600 text-lg leading-relaxed mb-8">
+                    {slides[currentSlide].content}
+                  </p>
+
+                  <div className="bg-slate-100 border-l-4 border-indigo-500 p-4 rounded-r-lg italic text-slate-700 font-medium">
+                    "{slides[currentSlide].quote}"
+                  </div>
+
+                </div>
+
+                {/* Presentation Controls */}
+                <div className="p-6 border-t border-slate-100 flex justify-between items-center bg-slate-50">
+                  <button 
+                    onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
+                    disabled={currentSlide === 0}
+                    className="flex items-center px-4 py-2 bg-white border border-slate-200 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" /> Prev
+                  </button>
+                  <div className="flex space-x-1">
+                    {slides.map((_, idx) => (
+                      <div key={idx} className={`w-2 h-2 rounded-full ${currentSlide === idx ? 'bg-indigo-600' : 'bg-slate-300'}`} />
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
+                    disabled={currentSlide === slides.length - 1}
+                    className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                  >
+                    Next <ChevronRight className="w-4 h-4 ml-2" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Panel: Interactive Visualizer */}
+              <div className="w-2/3 flex flex-col p-8 items-center justify-center bg-slate-100 relative">
+                
+                {/* Visualizer Header & Inputs */}
+                <div className="w-full max-w-3xl bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8 flex flex-row items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-800 flex items-center">
+                      <BoxSelect className="w-6 h-6 mr-2 text-indigo-500" />
+                      Transformation Matrix (A)
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-1">Modify the syntax to alter the space.</p>
+                  </div>
+
+                  <div className="flex flex-col space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <div className="flex space-x-2">
+                      <input type="text" value={matrix[0][0]} onChange={(e) => updateMatrix(0, 0, e.target.value)} className="w-16 h-12 text-center text-lg font-mono border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                      <input type="text" value={matrix[0][1]} onChange={(e) => updateMatrix(0, 1, e.target.value)} className="w-16 h-12 text-center text-lg font-mono border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                    </div>
+                    <div className="flex space-x-2">
+                      <input type="text" value={matrix[1][0]} onChange={(e) => updateMatrix(1, 0, e.target.value)} className="w-16 h-12 text-center text-lg font-mono border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                      <input type="text" value={matrix[1][1]} onChange={(e) => updateMatrix(1, 1, e.target.value)} className="w-16 h-12 text-center text-lg font-mono border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Preset Buttons */}
+                <div className="flex space-x-3 w-full max-w-3xl mb-4 z-10 relative">
+                  <button onClick={() => setPreset(presets.identity)} className="flex-1 flex items-center justify-center py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 hover:border-indigo-300 transition-all text-sm font-medium shadow-sm">
+                    <RotateCcw className="w-4 h-4 mr-2" /> Identity
+                  </button>
+                  <button onClick={() => setPreset(presets.rotation)} className="flex-1 flex items-center justify-center py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 hover:border-indigo-300 transition-all text-sm font-medium shadow-sm">
+                    <Play className="w-4 h-4 mr-2" /> Rotate 90°
+                  </button>
+                  <button onClick={() => setPreset(presets.scale)} className="flex-1 flex items-center justify-center py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 hover:border-indigo-300 transition-all text-sm font-medium shadow-sm">
+                    <Maximize2 className="w-4 h-4 mr-2" /> Scale
+                  </button>
+                  <button onClick={() => setPreset(presets.shear)} className="flex-1 flex items-center justify-center py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 hover:border-indigo-300 transition-all text-sm font-medium shadow-sm">
+                    <MoveDiagonal className="w-4 h-4 mr-2" /> Shear
+                  </button>
+                </div>
+
+                {/* The Visualizer Canvas (SVG) */}
+                <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden" style={{ width: size, height: size }}>
+                  <svg width={size} height={size} className="w-full h-full">
+                    
+                    {/* Background Grid (Original Space) */}
+                    <g className="opacity-20">
+                      {gridLines.map((line, i) => {
+                        const p1 = toSvg(line.x1, line.y1);
+                        const p2 = toSvg(line.x2, line.y2);
+                        return <line key={`bg-${i}`} x1={p1.cx} y1={p1.cy} x2={p2.cx} y2={p2.cy} stroke="#94a3b8" strokeWidth="1" />;
+                      })}
+                    </g>
+                    
+                    {/* Original Axes */}
+                    <line x1={0} y1={center} x2={size} y2={center} stroke="#475569" strokeWidth="2" className="opacity-40" />
+                    <line x1={center} y1={0} x2={center} y2={size} stroke="#475569" strokeWidth="2" className="opacity-40" />
+
+                    {/* Transformed Grid */}
+                    <g className="transition-all duration-500 ease-in-out">
+                      {gridLines.map((line, i) => {
+                        const t1 = transform(line.x1, line.y1);
+                        const t2 = transform(line.x2, line.y2);
+                        const p1 = toSvg(t1.x, t1.y);
+                        const p2 = toSvg(t2.x, t2.y);
+                        return <line key={`tf-${i}`} x1={p1.cx} y1={p1.cy} x2={p2.cx} y2={p2.cy} stroke="#6366f1" strokeWidth="1.5" className="opacity-40" />;
+                      })}
+                    </g>
+
+                    {/* Transformed Basis Vectors */}
+                    {(() => {
+                      const iHat = transform(1, 0);
+                      const jHat = transform(0, 1);
+                      const p0 = toSvg(0, 0);
+                      const pI = toSvg(iHat.x, iHat.y);
+                      const pJ = toSvg(jHat.x, jHat.y);
+                      
+                      // Transformed Unit Square Area
+                      const pIJ = toSvg(iHat.x + jHat.x, iHat.y + jHat.y);
+
+                      return (
+                        <g>
+                          {/* Unit Square Area Highlight */}
+                          <polygon 
+                            points={`${p0.cx},${p0.cy} ${pI.cx},${pI.cy} ${pIJ.cx},${pIJ.cy} ${pJ.cx},${pJ.cy}`} 
+                            fill="#818cf8" 
+                            fillOpacity="0.2" 
+                            stroke="#4f46e5" 
+                            strokeWidth="1"
+                            className="transition-all duration-500 ease-in-out"
+                          />
+                          
+                          {/* i-hat vector (Red) */}
+                          <line x1={p0.cx} y1={p0.cy} x2={pI.cx} y2={pI.cy} stroke="#ef4444" strokeWidth="3" markerEnd="url(#arrowhead-red)" className="transition-all duration-500 ease-in-out" />
+                          
+                          {/* j-hat vector (Green) */}
+                          <line x1={p0.cx} y1={p0.cy} x2={pJ.cx} y2={pJ.cy} stroke="#10b981" strokeWidth="3" markerEnd="url(#arrowhead-green)" className="transition-all duration-500 ease-in-out" />
+                        </g>
+                      );
+                    })()}
+
+                    {/* Arrowhead Markers */}
+                    <defs>
+                      <marker id="arrowhead-red" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                        <polygon points="0,0 6,3 0,6" fill="#ef4444" />
+                      </marker>
+                      <marker id="arrowhead-green" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                        <polygon points="0,0 6,3 0,6" fill="#10b981" />
+                      </marker>
+                    </defs>
+                  </svg>
+                </div>
+
+              </div>
+            </div>
+          );
+        }
+
+        // Render the React app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
